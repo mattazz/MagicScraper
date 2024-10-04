@@ -106,6 +106,8 @@ class MyApp(App):
                         id=f"button_{card['metadata']['id']}",
                         classes="button",
                     )
+                    button.data_card_uuid = card["metadata"]["id"]
+                    button.data_card_name = card["key"]
 
                     self.query_one(RichLog).write(f"Button created: {button}")
                     current_row.mount(button)
@@ -145,12 +147,14 @@ class MyApp(App):
             if isinstance(child, Horizontal) or isinstance(child, Label):
                 child.remove()
 
-        right_panel.mount(Label(f"Searching for Card now"))
+        button = event.button
 
-        button_id = event.button.id
-        card_uuid = button_id.split("_")[1]
+        card_uuid = button.data_card_uuid
+        card_name = button.data_card_name
+
         self.query_one(RichLog).write(f"Button pressed: {event.button.id}")
 
+        right_panel.mount(Label(f"Searching for {card_name} now", classes="yellow"))
         ### The search_seller_stock() function needs to take in a list
         card_list = [card_uuid]
         asyncio.create_task(

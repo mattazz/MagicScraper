@@ -16,8 +16,12 @@
 .button{
     margin-right: 2;
     width: 23;
-    border: round white
+    border: ascii
     
+}
+
+.button:hover{
+    background: rgb(255, 237, 148);
 }
 
 #card-info-container{
