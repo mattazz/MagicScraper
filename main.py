@@ -51,8 +51,7 @@ _______  _______  _______ _________ _______    _______  _______  _______  ______
         )
 
     def _on_key(self, event: Key) -> None:
-        print(f"Key event: {event}")  # Debugging statement
-        # self.query_one(RichLog).write(event)
+        print(f"Key event: {event}")  # Does nothing lol
 
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         self.query_one(RichLog).clear()
@@ -67,61 +66,90 @@ _______  _______  _______ _________ _______    _______  _______  _______  ______
         try:
             # Outputs dict
             self.query_one(RichLog).write("Fetching search cards...")
-            search_cards_result = await asyncio.to_thread(fetch_search_cards, card_name)
+            search_cards_result: list = await asyncio.to_thread(
+                fetch_search_cards, card_name
+            )
             self.query_one(RichLog).write(f"Fetch_search_cards: {search_cards_result}")
 
-            search_cards_id = []
+            # Once you get the cards, you should display the cards for user to select the right UUID
+            for result in search_cards_result:
+                self.query_one(RichLog).write(f"Card: {result}")
+
+            search_cards_id = []  # Only the ID
             for i in search_cards_result:
                 self.query_one(RichLog).write(f"Getting card UUID for: {i}")
                 x = await asyncio.to_thread(get_card_uuid, i)
                 search_cards_id.append(x)
 
+            # Layout Panels
             right_panel = self.query_one("#right-panel")
 
-            for card_id in search_cards_id:
-                for scraper in fetch_mm_scrapers_list():
-                    self.query_one(RichLog).write(
-                        f"Fetching seller info for card ID: {card_id} with scraper: {scraper}"
+            # Trying to display the list of Cards, and their UUIDs so users can click it
+            for card in search_cards_result:
+                self.query_one(RichLog).write(f"Adding button for card: {card['key']}")
+                right_panel.mount(
+                    Button(
+                        label=f"{card['key']}", id=f"button-{card['metadata']['id']}"
                     )
-                    seller_info = await asyncio.to_thread(
-                        fetch_seller_info, card_id, scraper
-                    )
-                    # self.query_one(RichLog).write(seller_info)
-                    if seller_info and int(seller_info[0]["stock"]) > 0:
-                        self.query_one(RichLog).write(str(Pretty(seller_info)))
+                )
 
-                        right_panel.mount(Label(print_hash(20), classes="red"))
+            #### This triggers the search
+            await self.search_seller_stock(search_cards_id, right_panel)
 
-                        for k, v in seller_info[0].items():
-
-                            match k:
-                                case "stock":
-                                    label = Label(f"{k}: {v}", classes="green")
-                                    right_panel.mount(label)
-                                case "inStock":
-                                    label = Label(f"{k}: {v}", classes="yellow")
-                                    right_panel.mount(label)
-                                case "url":
-                                    label = Label(f"{k}: {v}", classes="purple")
-                                    right_panel.mount(label)
-                                case _:
-                                    label = Label(f"{k}: {v}", classes="")
-                                    right_panel.mount(label)
-
-                        right_panel.mount(Label(print_hash(20), classes="red"))
-
-                        #### BROKEN due to height issue #####
-                        ### I think it's the use of the Panel that auto has height to fill parent
-
-                        # card_info_widget = CardInfoWidget(seller_info[0])
-                        # right_panel.mount(card_info_widget)
-                    else:
-                        self.query_one(RichLog).write(f"{scraper} out of stock")
         except asyncio.CancelledError:
             try:
                 self.query_one(RichLog).write("Task was cancelled")
             except NoMatches:
                 print("Task was cancelled and RichLog widget is not available")
+
+    async def search_seller_stock(self, search_cards_id: list, panel):
+        """Searches the list of UUIDs for seller price and info
+
+        Args:
+            search_cards_id (list): Taken from fetch_search_cards() which gets the list of cards and their
+            metadata (including id)
+
+            panel (textual.container): Textual Layout panel
+        """
+        for card_id in search_cards_id:
+            for scraper in fetch_mm_scrapers_list():
+                self.query_one(RichLog).write(
+                    f"Fetching seller info for card ID: {card_id} with scraper: {scraper}"
+                )
+                seller_info = await asyncio.to_thread(
+                    fetch_seller_info, card_id, scraper
+                )
+                # self.query_one(RichLog).write(seller_info)
+                if seller_info and int(seller_info[0]["stock"]) > 0:
+                    self.query_one(RichLog).write(str(Pretty(seller_info)))
+
+                    panel.mount(Label(print_hash(20), classes="red"))
+
+                    for k, v in seller_info[0].items():
+
+                        match k:
+                            case "stock":
+                                label = Label(f"{k}: {v}", classes="green")
+                                panel.mount(label)
+                            case "inStock":
+                                label = Label(f"{k}: {v}", classes="yellow")
+                                panel.mount(label)
+                            case "url":
+                                label = Label(f"{k}: {v}", classes="purple")
+                                panel.mount(label)
+                            case _:
+                                label = Label(f"{k}: {v}", classes="")
+                                panel.mount(label)
+
+                    panel.mount(Label(print_hash(20), classes="red"))
+
+                    #### BROKEN due to height issue #####
+                    ### I think it's the use of the Panel that auto has height to fill parent
+
+                    # card_info_widget = CardInfoWidget(seller_info[0])
+                    # right_panel.mount(card_info_widget)
+                else:
+                    self.query_one(RichLog).write(f"{scraper} out of stock")
 
 
 if __name__ == "__main__":

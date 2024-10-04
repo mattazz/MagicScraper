@@ -9,7 +9,9 @@
     color: black; /* Set text color */
 }
 
-
+.button{
+    margin:  10;
+}
 
 #card-info-container{
     height: auto;
