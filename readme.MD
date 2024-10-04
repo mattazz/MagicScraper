@@ -2,6 +2,7 @@
 
 MagicScraper is a Python application designed to search for Magic: The Gathering cards and fetch seller information from various sources. The application uses the Textual library for the user interface and Rich for pretty-printing and logging.
 
+![sample](./sample.gif)
 ## Features
 
 - Search for Magic: The Gathering cards by name
