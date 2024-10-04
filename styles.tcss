@@ -9,8 +9,15 @@
     color: black; /* Set text color */
 }
 
+.button-container{
+    /* border: ascii; */
+}
+
 .button{
-    margin:  10;
+    margin-right: 2;
+    width: 23;
+    border: round white
+    
 }
 
 #card-info-container{

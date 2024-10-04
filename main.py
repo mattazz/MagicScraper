@@ -18,6 +18,17 @@ from magicmargins import (
 from card_info_widget import CardInfoWidget  # Import the custom widget
 from text_card_info_widget import TextCardInfoWidget
 
+fancy_text_title = """
+_______  _______  _______ _________ _______    _______  _______  _______  _______  _______          
+(       )(  ___  )(  ____ \\__   __/(  ____ \  (  ____ \(  ____ \(  ___  )(  ____ )(  ____ \|\     /|
+| () () || (   ) || (    \/   ) (   | (    \/  | (    \/| (    \/| (   ) || (    )|| (    \/| )   ( |
+| || || || (___) || |         | |   | |        | (_____ | (__    | (___) || (____)|| |      | (___) |
+| |(_)| ||  ___  || | ____    | |   | |        (_____  )|  __)   |  ___  ||     __)| |      |  ___  |
+| |   | || (   ) || | \_  )   | |   | |              ) || (      | (   ) || (\ (   | |      | (   ) |
+| )   ( || )   ( || (___) |___) (___| (____/\  /\____) || (____/\| )   ( || ) \ \__| (____/\| )   ( |
+|/     \||/     \|(_______)\_______/(_______/  \_______)(_______/|/     \||/   \__/(_______/|/     \|
+"""
+
 
 class MyApp(App):
     CSS_PATH = "styles.tcss"
@@ -29,16 +40,7 @@ class MyApp(App):
         yield Horizontal(
             Vertical(
                 Static(
-                    """
-_______  _______  _______ _________ _______    _______  _______  _______  _______  _______          
-(       )(  ___  )(  ____ \\__   __/(  ____ \  (  ____ \(  ____ \(  ___  )(  ____ )(  ____ \|\     /|
-| () () || (   ) || (    \/   ) (   | (    \/  | (    \/| (    \/| (   ) || (    )|| (    \/| )   ( |
-| || || || (___) || |         | |   | |        | (_____ | (__    | (___) || (____)|| |      | (___) |
-| |(_)| ||  ___  || | ____    | |   | |        (_____  )|  __)   |  ___  ||     __)| |      |  ___  |
-| |   | || (   ) || | \_  )   | |   | |              ) || (      | (   ) || (\ (   | |      | (   ) |
-| )   ( || )   ( || (___) |___) (___| (____/\  /\____) || (____/\| )   ( || ) \ \__| (____/\| )   ( |
-|/     \||/     \|(_______)\_______/(_______/  \_______)(_______/|/     \||/   \__/(_______/|/     \|
-""",
+                    "Magic Search",
                     id="main-title",
                 ),
                 Label("Press enter to submit"),
@@ -86,20 +88,47 @@ _______  _______  _______ _________ _______    _______  _______  _______  ______
 
             ## For eventual button container
             max_buttons_per_row = 3
-            current_row = Horizontal()
+            current_row = Horizontal(classes="button-container")
+
+            right_panel.mount(Label("Click on the correct card you wanted to search"))
+            right_panel.mount(current_row)
             button_count = 0
 
             # Trying to display the list of Cards, and their UUIDs so users can click it
+
             for card in search_cards_result:
-                self.query_one(RichLog).write(f"Adding button for card: {card['key']}")
-                right_panel.mount(
-                    Button(
-                        label=f"{card['key']}", id=f"button-{card['metadata']['id']}"
+                try:
+                    self.query_one(RichLog).write(
+                        f"Adding button for card: {card['key']}"
                     )
+                    button = Button(
+                        label=f"{card['key']}",
+                        id=f"button-{card['metadata']['id']}",
+                        classes="button",
+                    )
+                    self.query_one(RichLog).write(f"Button created: {button}")
+                    current_row.mount(button)
+                    button_count += 1
+
+                    if button_count >= max_buttons_per_row:
+                        self.query_one(RichLog).write(
+                            f"Mounting row with {button_count} buttons"
+                        )
+                        self.query_one(RichLog).write(f"Mounting in the right_panel")
+                        current_row = Horizontal(classes="button-container")
+                        right_panel.mount(current_row)
+                        button_count = 0
+                except Exception as e:
+                    self.query_one(RichLog).write(f"Error adding button: {e}")
+
+            if button_count > 0:
+                self.query_one(RichLog).write(
+                    f"Mounting last row with {button_count} buttons"
                 )
+                right_panel.mount(current_row)
 
             #### This triggers the search
-            await self.search_seller_stock(search_cards_id, right_panel)
+            # await self.search_seller_stock(search_cards_id, right_panel)
 
         except asyncio.CancelledError:
             try:
