@@ -90,7 +90,7 @@ _______  _______  _______ _________ _______    _______  _______  _______  ______
                     if seller_info and int(seller_info[0]["stock"]) > 0:
                         self.query_one(RichLog).write(str(Pretty(seller_info)))
 
-                        right_panel.mount(Label(print_hash(20)))
+                        right_panel.mount(Label(print_hash(20), classes="red"))
 
                         for k, v in seller_info[0].items():
 
@@ -105,10 +105,10 @@ _______  _______  _______ _________ _______    _______  _______  _______  ______
                                     label = Label(f"{k}: {v}", classes="purple")
                                     right_panel.mount(label)
                                 case _:
-                                    label = Label(f"{k}: {v}", classes="green")
+                                    label = Label(f"{k}: {v}", classes="")
                                     right_panel.mount(label)
 
-                        right_panel.mount(Label(print_hash(20)))
+                        right_panel.mount(Label(print_hash(20), classes="red"))
 
                         #### BROKEN due to height issue #####
                         ### I think it's the use of the Panel that auto has height to fill parent

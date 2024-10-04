@@ -29,3 +29,7 @@
 .purple{
     color: purple;
 }
+
+.red{
+    color: rgb(255, 107, 107)
+}
