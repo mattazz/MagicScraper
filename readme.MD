@@ -15,3 +15,5 @@ MagicScraper is a Python application designed to search for Magic: The Gathering
 
 - [ ] Sort by lowest price
 - [ ] Add function for uploading CSV  
+- [ ] Search results seem to output duplicates
+- [ ] check if link to card purchase is always correct
