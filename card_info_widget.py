@@ -32,4 +32,7 @@ class CardInfoWidget(Widget):
         card_details.append(f"Borderless: {self.card_info['borderless']}\n")
         card_details.append(f"Condition: {self.card_info['condition']}\n")
 
-        return Panel(card_details, title="Card Information", padding=(0, 1))
+        return Panel(card_details, title="Card Information", expand=True)
+
+    class Meta:
+        css_class = "card-info-widget"

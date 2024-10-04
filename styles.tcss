@@ -1,3 +1,31 @@
-#main-title{
+#main-title {
     text-align: center;
+}
+
+.card-info-widget {
+    border: solid #ccc; /* Set a border style */
+    background: #f9f9f9; /* Set background color */
+    padding: 1 1 1 1; /* Set padding with integers */
+    color: black; /* Set text color */
+}
+
+
+
+#card-info-container{
+    height: auto;
+}
+#right-panel{
+    overflow-y: auto;
+}
+
+.green{
+    color: yellowgreen;
+}
+
+.yellow{
+    color: yellow;
+}
+
+.purple{
+    color: purple;
 }

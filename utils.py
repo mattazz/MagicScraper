@@ -13,5 +13,6 @@ def prettify_print(objects: dict) -> None:
 def print_hash(num: int, char="#"):
     try:
         print(num * char)
+        return num * char
     except ValueError:
         print(f"Invalid")
