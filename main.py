@@ -103,9 +103,10 @@ class MyApp(App):
                     )
                     button = Button(
                         label=f"{card['key']}",
-                        id=f"button-{card['metadata']['id']}",
+                        id=f"button_{card['metadata']['id']}",
                         classes="button",
                     )
+
                     self.query_one(RichLog).write(f"Button created: {button}")
                     current_row.mount(button)
                     button_count += 1
@@ -136,6 +137,26 @@ class MyApp(App):
             except NoMatches:
                 print("Task was cancelled and RichLog widget is not available")
 
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        ## Clearing contents of RichLog
+        right_panel = self.query_one("#right-panel")
+        for child in list(right_panel.children):
+            self.query_one(RichLog).write(f"unmounting: {child}")
+            if isinstance(child, Horizontal) or isinstance(child, Label):
+                child.remove()
+
+        right_panel.mount(Label(f"Searching for Card now"))
+
+        button_id = event.button.id
+        card_uuid = button_id.split("_")[1]
+        self.query_one(RichLog).write(f"Button pressed: {event.button.id}")
+
+        ### The search_seller_stock() function needs to take in a list
+        card_list = [card_uuid]
+        asyncio.create_task(
+            self.search_seller_stock(card_list, self.query_one("#right-panel"))
+        )
+
     async def search_seller_stock(self, search_cards_id: list, panel):
         """Searches the list of UUIDs for seller price and info
 
@@ -145,6 +166,8 @@ class MyApp(App):
 
             panel (textual.container): Textual Layout panel
         """
+        # self.query_one(RichLog).clear()
+
         for card_id in search_cards_id:
             for scraper in fetch_mm_scrapers_list():
                 self.query_one(RichLog).write(
