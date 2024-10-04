@@ -178,12 +178,8 @@ class MyApp(App):
                 )
                 # self.query_one(RichLog).write(seller_info)
                 if seller_info and int(seller_info[0]["stock"]) > 0:
-                    self.query_one(RichLog).write(str(Pretty(seller_info)))
-
                     panel.mount(Label(print_hash(20), classes="red"))
-
                     for k, v in seller_info[0].items():
-
                         match k:
                             case "stock":
                                 label = Label(f"{k}: {v}", classes="green")
@@ -192,7 +188,7 @@ class MyApp(App):
                                 label = Label(f"{k}: {v}", classes="yellow")
                                 panel.mount(label)
                             case "url":
-                                label = Label(f"{k}: {v}", classes="purple")
+                                label = Label(f"{k}: {v}", classes="yellow")
                                 panel.mount(label)
                             case _:
                                 label = Label(f"{k}: {v}", classes="")
