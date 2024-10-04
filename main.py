@@ -84,6 +84,11 @@ _______  _______  _______ _________ _______    _______  _______  _______  ______
             # Layout Panels
             right_panel = self.query_one("#right-panel")
 
+            ## For eventual button container
+            max_buttons_per_row = 3
+            current_row = Horizontal()
+            button_count = 0
+
             # Trying to display the list of Cards, and their UUIDs so users can click it
             for card in search_cards_result:
                 self.query_one(RichLog).write(f"Adding button for card: {card['key']}")
