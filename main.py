@@ -4,16 +4,19 @@ from textual.app import App, ComposeResult
 from textual.events import Key
 from textual.widgets import Static, Button, Header, Label, RichLog, Input, Pretty
 from textual.containers import Horizontal, Vertical, VerticalScroll
-from textual.css.query import NoMatches  # Import NoMatches exception
-
+from textual.css.query import NoMatches  # Import NoMatches exceptio
+from textual_imageview.viewer import ImageViewer
+from PIL import Image
 from utils import print_hash
-
+import requests
+from io import BytesIO
 from magicmargins import (
     fetch_search_cards,
     get_card_uuid,
     fetch_mm_scrapers_list,
     fetch_seller_info,
     format_seller_info,
+    fetch_full_card_details,
 )
 from card_info_widget import CardInfoWidget  # Import the custom widget
 from text_card_info_widget import TextCardInfoWidget
@@ -46,6 +49,10 @@ class MyApp(App):
                 Label("Press enter to submit"),
                 Input(placeholder="Enter card name...", id="card-input"),
                 RichLog(id="log"),
+                Vertical(
+                    Label("Image gallery", classes="center"),
+                    id="img-gallery",
+                ),
                 id="left-panel",
             ),
             Vertical(id="right-panel"),
@@ -65,12 +72,52 @@ class MyApp(App):
         asyncio.create_task(self.run_main_program(card_name))
 
     async def run_main_program(self, card_name: str) -> None:
+        # Remove image on new search
+        img_panel = self.query_one("#img-gallery")
+        for child in list(img_panel.children):
+            self.query_one(RichLog).write(f"unmounting: {child}")
+            if isinstance(child, Vertical) or isinstance(child, ImageViewer):
+                child.remove()
+
         try:
             # Outputs dict
             self.query_one(RichLog).write("Fetching search cards...")
             search_cards_result: list = await asyncio.to_thread(
                 fetch_search_cards, card_name
             )
+
+            ## SEARCH IMAGE HERE AS TEST [{'key': name, 'id': id, }]
+            #### Then ['image_url']
+
+            image_list = []
+            test_image_data = search_cards_result[0]["key"]
+            self.query_one(RichLog).write(f"search image data: {test_image_data}")
+
+            image_list.append(test_image_data)
+
+            test_image_result: dict = await asyncio.to_thread(
+                fetch_full_card_details, image_list
+            )
+            self.query_one(RichLog).write(f"Search image result: {test_image_result}")
+            image_url = test_image_result["cards"][0]["image_url"]
+
+            self.query_one(RichLog).write(f"img_url: {image_url}")
+
+            response = requests.get(image_url)
+            self.query_one(RichLog).write(f"Response: {response.content}")
+
+            response.raise_for_status()
+
+            # open the image using pillow
+            image = Image.open(BytesIO(response.content))
+            self.query_one(RichLog).write(f"Image size: {image.size}")
+
+            self.query_one(RichLog).write(f"Final image: {image}")
+
+            # Display the image using ImageViewer
+            image_viewer = ImageViewer(image)
+            self.query_one("#img-gallery").mount(image_viewer)
+
             self.query_one(RichLog).write(f"Fetch_search_cards: {search_cards_result}")
 
             # Once you get the cards, you should display the cards for user to select the right UUID

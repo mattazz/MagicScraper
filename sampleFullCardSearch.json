@@ -1,0 +1,44 @@
+{
+    "cards": [
+      {
+        "id": "af482a14-a144-4e60-bd04-a548a3c89f5a",
+        "name": "Heartfire",
+        "image_url": "https://cards.scryfall.io/normal/front/a/f/af482a14-a144-4e60-bd04-a548a3c89f5a.jpg?1601081772",
+        "large_image_url": "https://cards.scryfall.io/normal/front/a/f/af482a14-a144-4e60-bd04-a548a3c89f5a.jpg?1601081772",
+        "set": "jmp",
+        "set_name": "Jumpstart",
+        "legalities": {
+          "standard": "not_legal",
+          "oldschool": "not_legal",
+          "historic": "legal",
+          "legacy": "legal",
+          "paupercommander": "legal",
+          "oathbreaker": "legal",
+          "gladiator": "legal",
+          "standardbrawl": "not_legal",
+          "alchemy": "not_legal",
+          "pioneer": "legal",
+          "commander": "legal",
+          "modern": "legal",
+          "pauper": "legal",
+          "premodern": "not_legal",
+          "future": "not_legal",
+          "vintage": "legal",
+          "duel": "legal",
+          "explorer": "legal",
+          "predh": "not_legal",
+          "brawl": "legal",
+          "penny": "legal",
+          "timeless": "legal"
+        },
+        "mana_cost": "{1}{R}",
+        "rarity": "common",
+        "type_line": "Instant",
+        "oracle_text": "As an additional cost to cast this spell, sacrifice a creature or planeswalker.\nHeartfire deals 4 damage to any target.",
+        "flavor_text": "The mage looked within and realized there was still one piece of fuel to burn.",
+        "power": null,
+        "toughness": null,
+        "released_at": "2020-07-17"
+      }
+    ]
+  }

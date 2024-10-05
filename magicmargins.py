@@ -17,7 +17,7 @@ def fetch_search_cards(search: str) -> dict:
         dict: A dict of cards with their details.
     """
 
-    url = f"https://magicmargins.ca/v1/cards?search={search}&sparse=true"
+    url = f"https://magicmargins.ca/v1/cards?search={search}&sparse=false"
     response = requests.get(url)
     if response.status_code == 200:
         try:
@@ -28,6 +28,33 @@ def fetch_search_cards(search: str) -> dict:
             return None
     else:
         print(f"Failed to fetch data for {search}: {response.status_code}")
+        return None
+
+
+def fetch_full_card_details(card_names: list) -> list:
+    """
+    Fetches the full metadata for a list of card names, including image URLs.
+
+    Args:
+        card_names (list): A list of card names.
+
+    Returns:
+        list: A list of dicts containing the full metadata for each card.
+    """
+    url = "https://magicmargins.ca/v1/cards"
+    payload = {"cardNames": card_names, "unique": True}
+    headers = {"Content-Type": "application/json"}
+    response = requests.post(url, json=payload, headers=headers)
+    if response.status_code == 200:
+        try:
+            return response.json()
+        except requests.exceptions.JSONDecodeError:
+            print(f"No JSON content returned for {card_names}")
+            return None
+    else:
+        print(
+            f"Failed to fetch full card details for {card_names}: {response.status_code}"
+        )
         return None
 
 
@@ -194,3 +221,5 @@ def main():
 
 
 # main()
+
+# print(fetch_full_card_details(["Heartfire"]))

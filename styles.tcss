@@ -46,3 +46,8 @@
 .red{
     color: rgb(255, 107, 107)
 }
+.center{
+    text-align: center;
+    border: solid white;
+    width: 100%;
+}
