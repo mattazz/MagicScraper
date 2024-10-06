@@ -1,4 +1,5 @@
 import asyncio
+from rich.console import Console
 from typing import Coroutine
 from textual.app import App, ComposeResult
 from textual.events import Key, MouseMove, Enter, Leave
@@ -179,7 +180,11 @@ class MyApp(App):
             ## Remove previous image
             for child in list(img_gallery_panel.children):
                 self.query_one(RichLog).write(f"unmounting: {child}")
-                if isinstance(child, Horizontal) or isinstance(child, ImageViewer):
+                if (
+                    isinstance(child, Horizontal)
+                    or isinstance(child, ImageViewer)
+                    or isinstance(child, Label)
+                ):
                     child.remove()
 
             self.query_one(RichLog).write(f"Hovering on: {event.node.id}")
@@ -226,6 +231,7 @@ class MyApp(App):
                 self.query_one("#img-gallery").mount(image_viewer)
             except ValueError:
                 self.query_one(RichLog).write(f"Invalid img_url: {image_url}")
+                img_gallery_panel.mount(Label(f"No image to display"))
 
     def on_leave(self, event: Leave) -> None:
         if isinstance(event.node, Button):
@@ -270,46 +276,78 @@ class MyApp(App):
         """
         # self.query_one(RichLog).clear()
 
+        # FETCH SELLER STOCK
         for card_id in search_cards_id:
             for scraper in fetch_mm_scrapers_list():
                 self.query_one(RichLog).write(
                     f"Fetching seller info for card ID: {card_id} with scraper: {scraper}"
                 )
-                seller_info = await asyncio.to_thread(
-                    fetch_seller_info, card_id, scraper
-                )
+                try:
+                    # Add timeout to the fetch_seller_info call
+                    seller_info = await asyncio.wait_for(
+                        asyncio.to_thread(fetch_seller_info, card_id, scraper),
+                        timeout=10.0,
+                    )
 
-                self.query_one(RichLog).write(f"seller info: {seller_info}")
-                # self.query_one(RichLog).write(seller_info)
-                if seller_info and int(seller_info[0]["stock"]) > 0:
-                    panel.mount(Label(print_hash(20), classes="red"))
-                    for k, v in seller_info[0].items():
-                        match k:
-                            case "price":
-                                label = Label(f"{k}: {v}", classes="green")
-                                panel.mount(label)
-                            case "stock":
-                                label = Label(f"{k}: {v}", classes="green")
-                                panel.mount(label)
-                            case "inStock":
-                                label = Label(f"{k}: {v}", classes="yellow")
-                                panel.mount(label)
-                            case "url":
-                                label = Label(f"{k}: {v}", classes="yellow")
-                                panel.mount(label)
-                            case _:
-                                label = Label(f"{k}: {v}", classes="")
-                                panel.mount(label)
+                    self.query_one(RichLog).write(f"seller info: {seller_info}")
 
-                    panel.mount(Label(print_hash(20), classes="red"))
+                    if seller_info:
+                        for seller in seller_info:
+                            self.query_one(RichLog).write(f"Seller: {seller}")
+                            self.query_one(RichLog).write(
+                                f"{seller} inStock: {seller['inStock']}"
+                            )
 
-                    #### BROKEN due to height issue #####
-                    ### I think it's the use of the Panel that auto has height to fill parent
+                            # Corrected condition
+                            if seller and (
+                                seller["inStock"] or int(seller["stock"]) > 0
+                            ):
+                                panel.mount(Label(print_hash(20), classes="red"))
+                                for k, v in seller.items():
+                                    match k:
+                                        case "price":
+                                            label = Label(f"{k}: {v}", classes="green")
+                                            panel.mount(label)
+                                        case "stock":
+                                            label = Label(f"{k}: {v}", classes="green")
+                                            panel.mount(label)
+                                        case "inStock":
+                                            label = Label(f"{k}: {v}", classes="yellow")
+                                            panel.mount(label)
+                                        case "url":
+                                            label = Label(f"{k}: {v}", classes="yellow")
+                                            panel.mount(label)
+                                        case _:
+                                            label = Label(f"{k}: {v}", classes="")
+                                            panel.mount(label)
 
-                    # card_info_widget = CardInfoWidget(seller_info[0])
-                    # right_panel.mount(card_info_widget)
-                else:
-                    self.query_one(RichLog).write(f"{scraper} out of stock")
+                                panel.mount(Label(print_hash(20), classes="red"))
+
+                                #### BROKEN due to height issue #####
+                                ### I think it's the use of the Panel that auto has height to fill parent
+
+                                # card_info_widget = CardInfoWidget(seller_info[0])
+                                # right_panel.mount(card_info_widget)
+                            else:
+                                self.query_one(RichLog).write(f"{scraper} out of stock")
+                    else:
+                        self.query_one(RichLog).write(
+                            f"No seller info, continuing search"
+                        )
+                        continue
+                except asyncio.TimeoutError:
+                    self.query_one(RichLog).write(
+                        f"Timeout fetching seller info for card ID: {card_id} with scraper: {scraper}"
+                    )
+                except asyncio.CancelledError:
+                    self.query_one(RichLog).write("Search task was cancelled.")
+                    return
+                except Exception as e:
+                    self.query_one(RichLog).write(f"Error fetching seller info: {e}")
+
+            # FINISHED SEARCH, DISPLAY MESSAGE
+            self.query_one(RichLog).write(f"SEARCH DONE")
+            self.query_one("#right-panel").mount(Label(f"SEARCH DONE"))
 
 
 if __name__ == "__main__":

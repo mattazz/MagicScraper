@@ -147,7 +147,7 @@ def fetch_mm_scrapers_list() -> list:
         return None
 
 
-def fetch_seller_info(cardID: str, scraperID: str):
+def fetch_seller_info(cardID: str, scraperID: str) -> json:
     """Gets seller info list, if it's in-stock, price etc.
 
     Args:

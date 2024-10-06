@@ -29,6 +29,7 @@
 }
 #right-panel{
     overflow-y: auto;
+    overflow-x: scroll;
 }
 
 .green{
