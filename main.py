@@ -276,6 +276,9 @@ class MyApp(App):
                     panel.mount(Label(print_hash(20), classes="red"))
                     for k, v in seller_info[0].items():
                         match k:
+                            case "price":
+                                label = Label(f"{k}: {v}", classes="green")
+                                panel.mount(label)
                             case "stock":
                                 label = Label(f"{k}: {v}", classes="green")
                                 panel.mount(label)
