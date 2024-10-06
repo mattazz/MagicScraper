@@ -207,21 +207,25 @@ class MyApp(App):
 
             self.query_one(RichLog).write(f"img_url: {image_url}")
 
-            response = requests.get(image_url)
-            self.query_one(RichLog).write(f"Response: {response.content}")
+            try:
+                response = requests.get(image_url)
 
-            response.raise_for_status()
+                self.query_one(RichLog).write(f"Response: {response.content}")
 
-            # open the image using pillow
-            image = Image.open(BytesIO(response.content))
-            self.query_one(RichLog).write(f"Image size: {image.size}")
-            image = image.resize((976, 1360), Image.LANCZOS)
+                response.raise_for_status()
 
-            self.query_one(RichLog).write(f"Final image: {image}")
+                # open the image using pillow
+                image = Image.open(BytesIO(response.content))
+                self.query_one(RichLog).write(f"Image size: {image.size}")
+                image = image.resize((976, 1360), Image.LANCZOS)
 
-            # Display the image using ImageViewer
-            image_viewer = ImageViewer(image)
-            self.query_one("#img-gallery").mount(image_viewer)
+                self.query_one(RichLog).write(f"Final image: {image}")
+
+                # Display the image using ImageViewer
+                image_viewer = ImageViewer(image)
+                self.query_one("#img-gallery").mount(image_viewer)
+            except ValueError:
+                self.query_one(RichLog).write(f"Invalid img_url: {image_url}")
 
     def on_leave(self, event: Leave) -> None:
         if isinstance(event.node, Button):

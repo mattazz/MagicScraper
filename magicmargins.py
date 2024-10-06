@@ -219,11 +219,3 @@ def main():
 
 
 # main()
-
-scrapers = fetch_mm_scrapers_list()
-print(f"Scrapers: {scrapers}")
-
-for scraper in scrapers:
-    print()
-    res = fetch_seller_info("af482a14-a144-4e60-bd04-a548a3c89f5a", scraper)
-    print(res)
