@@ -246,6 +246,9 @@ class MyApp(App):
         self.query_one(RichLog).write(f"Button pressed: {event.button.id}")
 
         right_panel.mount(Label(f"Searching for {card_name} now", classes="yellow"))
+        right_panel.mount(
+            Label(f"Just type in a new card to begin a new search", classes="yellow")
+        )
         ### The search_seller_stock() function needs to take in a list
         card_list = [card_uuid]
         asyncio.create_task(
@@ -271,6 +274,8 @@ class MyApp(App):
                 seller_info = await asyncio.to_thread(
                     fetch_seller_info, card_id, scraper
                 )
+
+                self.query_one(RichLog).write(f"seller info: {seller_info}")
                 # self.query_one(RichLog).write(seller_info)
                 if seller_info and int(seller_info[0]["stock"]) > 0:
                     panel.mount(Label(print_hash(20), classes="red"))

@@ -159,9 +159,7 @@ def fetch_seller_info(cardID: str, scraperID: str):
         _type_: _description_
     """
 
-    url = (
-        f"https://magicmargins.ca/v1/scrapers/kanatacg/scrape/{cardID}?ignore_sets=true"
-    )
+    url = f"https://magicmargins.ca/v1/scrapers/{scraperID}/scrape/{cardID}?ignore_sets=true"
     response = requests.get(url)
 
     if response.status_code == 200:
@@ -222,4 +220,10 @@ def main():
 
 # main()
 
-# print(fetch_full_card_details(["Heartfire"]))
+scrapers = fetch_mm_scrapers_list()
+print(f"Scrapers: {scrapers}")
+
+for scraper in scrapers:
+    print()
+    res = fetch_seller_info("af482a14-a144-4e60-bd04-a548a3c89f5a", scraper)
+    print(res)
